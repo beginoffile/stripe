@@ -1,1 +1,1 @@
-#Use Payment platform
+Use Payment platform

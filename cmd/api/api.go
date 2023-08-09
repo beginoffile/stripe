@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"flag"
@@ -6,17 +6,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"text/template"
 	"time"
 )
 
 const version = "1.0.0"
-const cssVersion = "1"
 
 type config struct {
 	port int
 	env  string
-	api  string
 	db   struct {
 		dsn string
 	}
@@ -27,11 +24,10 @@ type config struct {
 }
 
 type application struct {
-	config        config
-	infoLog       *log.Logger
-	errorLog      *log.Logger
-	templaceCache map[string]*template.Template
-	version       string
+	config   config
+	infoLog  *log.Logger
+	errorLog *log.Logger
+	version  string
 }
 
 func (app *application) serve() error {
@@ -44,16 +40,16 @@ func (app *application) serve() error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	app.infoLog.Println(fmt.Sprintf("Starting  HTTP server in %s mode on port %d", app.config.env, app.config.port))
+	app.infoLog.Println(fmt.Sprintf("Starting  BackEnd Server in %s mode on port %d", app.config.env, app.config.port))
 
 	return srv.ListenAndServe()
 }
 
 func main() {
+
 	var cfg config
-	flag.IntVar(&cfg.port, "port", 4000, "Server port to listen on ")
-	flag.StringVar(&cfg.env, "env", "development", "Application Environment {development|production}")
-	flag.StringVar(&cfg.api, "api", "http://localhost:4000", "URL to api")
+	flag.IntVar(&cfg.port, "port", 4001, "Server port to listen on ")
+	flag.StringVar(&cfg.env, "env", "development", "Application Environment {development|production|maintenance}")
 
 	flag.Parse()
 
@@ -65,20 +61,16 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	tc := make(map[string]*template.Template)
-
 	app := &application{
-		config:        cfg,
-		infoLog:       infoLog,
-		errorLog:      errorLog,
-		templaceCache: tc,
-		version:       version,
+		config:   cfg,
+		infoLog:  infoLog,
+		errorLog: errorLog,
+		version:  version,
 	}
 
 	err := app.serve()
 
 	if err != nil {
-		app.errorLog.Println(err)
 		log.Fatal(err)
 	}
 
