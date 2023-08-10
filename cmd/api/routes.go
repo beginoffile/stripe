@@ -1,4 +1,4 @@
-package api
+package main
 
 import (
 	"net/http"
@@ -17,6 +17,8 @@ func (app *application) routes() http.Handler {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+
+	mux.Post("/api/payment-intent", app.GetPaymentIntent)
 
 	return mux
 }

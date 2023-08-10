@@ -1,4 +1,4 @@
-package api
+package main
 
 import (
 	"flag"
@@ -69,7 +69,6 @@ func main() {
 	}
 
 	err := app.serve()
-
 	if err != nil {
 		log.Fatal(err)
 	}
