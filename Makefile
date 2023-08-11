@@ -34,7 +34,7 @@ start: start_front start_back
 ## start_front: starts the front end
 start_front: build_front
 	@echo Starting the front end...
-	set STRIPE_KEY=${STRIPE_KEY} && set STRIPE_SECRET=${STRIPE_SECRET} && start /B .\dist\gostripe.exe -dsn=${DSN}
+	set STRIPE_KEY=${STRIPE_KEY} && set STRIPE_SECRET=${STRIPE_SECRET} && start /B .\dist\gostripe.exe	
 	@echo Front end running!
 
 ## start_back: starts the back end

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"myapp/internal/cards"
 	"net/http"
 	"strconv"
@@ -24,7 +23,6 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 	var payload stripePayLoad
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
-
 	if err != nil {
 		app.errorLog.Println(err)
 		return
@@ -42,19 +40,12 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 		Currrency: payload.Currency,
 	}
 
-	fmt.Println("Esta es la Secret", card.Secret)
-	fmt.Println("Esta es la Key", card.Key)
-	fmt.Println("Esta es la Currency", card.Currrency)
-
 	okay := true
 
 	pi, msg, err := card.Charge(payload.Currency, amount)
 	if err != nil {
 		okay = false
 	}
-
-	fmt.Println("Ok", okay)
-	fmt.Println("pi", pi)
 
 	if okay {
 		out, err := json.MarshalIndent(pi, "", "   ")
