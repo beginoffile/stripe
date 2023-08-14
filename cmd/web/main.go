@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"myapp/internal/driver"
 	"net/http"
 	"os"
-	"text/template"
 	"time"
 )
 
@@ -31,7 +31,7 @@ type application struct {
 	config        config
 	infoLog       *log.Logger
 	errorLog      *log.Logger
-	templaceCache map[string]*template.Template
+	templateCache map[string]*template.Template
 	version       string
 }
 
@@ -80,7 +80,7 @@ func main() {
 		config:        cfg,
 		infoLog:       infoLog,
 		errorLog:      errorLog,
-		templaceCache: tc,
+		templateCache: tc,
 		version:       version,
 	}
 

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strings"
-	"text/template"
 )
 
 type templateData struct {
@@ -38,12 +40,17 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 	var err error
 	templateToRender := fmt.Sprintf("templates/%s.page.tmpl", page)
 
-	_, templateInMap := app.templaceCache[templateToRender]
+	_, templateInMap := app.templateCache[templateToRender]
+
+	fmt.Println("Que hay AQUI?????==>", templateInMap)
 
 	if app.config.env == "production" && templateInMap {
-		t = app.templaceCache[templateToRender]
+		fmt.Println("AUI", templateInMap)
+		t = app.templateCache[templateToRender]
 	} else {
+		fmt.Println("Else", page, partials, templateToRender)
 		t, err = app.parseTemplate(partials, page, templateToRender)
+		fmt.Println("t", t)
 
 		if err != nil {
 			app.errorLog.Println(err)
@@ -57,39 +64,95 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 
 	td = app.addDefaultData(td, r)
 
-	err = t.Execute(w, td)
+	/*
+		err = t.Execute(w, td)
+		if err != nil {
+			app.errorLog.Println(err)
+			return err
+		}
+	*/
 
+	buf := new(bytes.Buffer)
+	err = t.Execute(buf, td)
 	if err != nil {
-		app.errorLog.Println(err)
+		log.Println(err)
+	}
+
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		fmt.Println("Error writing template to browser", err)
 		return err
 	}
 
 	return nil
 }
 
+/*
+	func (app *application) parseTemplate(partials []string, page, templateToRender string) (*template.Template, error) {
+		var t *template.Template
+		var err error
+
+		//build partials
+		if len(partials) > 0 {
+			for i, x := range partials {
+				partials[i] = fmt.Sprintf("templates/%s.partial.tmpl", x)
+			}
+		}
+		if len(partials) > 0 {
+			t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", strings.Join(partials, ","), templateToRender)
+		} else {
+			t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", templateToRender)
+
+		}
+
+		if err != nil {
+			app.errorLog.Println(err)
+			return nil, err
+		}
+
+		app.templaceCache[templateToRender] = t
+
+		return t, nil
+	}
+*/
 func (app *application) parseTemplate(partials []string, page, templateToRender string) (*template.Template, error) {
 	var t *template.Template
 	var err error
 
-	//build partials
+	// build partials
 	if len(partials) > 0 {
 		for i, x := range partials {
 			partials[i] = fmt.Sprintf("templates/%s.partial.tmpl", x)
 		}
 	}
+
 	if len(partials) > 0 {
 		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", strings.Join(partials, ","), templateToRender)
 	} else {
 		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", templateToRender)
-
+		fmt.Println("New Template", fmt.Sprintf("%s.page.tmpl", page))
+		fmt.Println("New Template", templateToRender)
 	}
-
 	if err != nil {
 		app.errorLog.Println(err)
 		return nil, err
 	}
 
-	app.templaceCache[templateToRender] = t
+	fmt.Println(page)
+	fmt.Println(templateToRender)
 
+	/*
+		page = fmt.Sprintf("%s.page.tmpl", page)
+
+		templateToRender = "./cmd/web/" + templateToRender
+		layout1 := "./cmd/web/templates/base.layout.tmpl"
+		t, err = template.New(page).Funcs(functions).ParseFiles(layout1, templateToRender)
+		if err != nil {
+			app.errorLog.Println(err)
+			return nil, err
+		}
+	*/
+
+	app.templateCache[templateToRender] = t
 	return t, nil
 }
