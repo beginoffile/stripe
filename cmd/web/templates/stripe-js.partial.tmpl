@@ -11,7 +11,7 @@
         
 
        // stripe= Stripe('pk_test_51Ncv6hBYhbsWghvUJpK8J1wHdrB83whF3RJS1HvaJAJwdQgLs9sajjIHNijvPqdqQu6iBJgTEIShdhUkIY4tCYva00b2exa6pi')              
-       stripe = Stripe("{{index .StringMap "publishable_key"}}");
+       stripe = Stripe("{{ .StripePublishableKey}}");
 
         function hidePayButtons(){
             payButton.classList.add("d-none");
