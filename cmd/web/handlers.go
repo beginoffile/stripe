@@ -9,6 +9,20 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Home Display the home page
+func (app *application) Home(w http.ResponseWriter, r *http.Request) {
+
+	// stringMap := make(map[string]string)
+	// stringMap["publishable_key"] = app.config.stripe.key
+
+	if err := app.renderTemplate(w, r, "home", &templateData{
+		// StringMap: stringMap,
+	}); err != nil {
+		app.errorLog.Println(err)
+
+	}
+}
+
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
 
 	// stringMap := make(map[string]string)
