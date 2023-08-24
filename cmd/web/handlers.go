@@ -349,9 +349,36 @@ func (app *application) ChargeOne(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	data["widget"] = widget
 
-	if err := app.renderTemplate(w, r, "buy-once", &templateData{
+	err = app.renderTemplate(w, r, "buy-once", &templateData{
 		Data: data,
-	}, "stripe-js"); err != nil {
+	}, "stripe-js")
+
+	if err != nil {
 		app.errorLog.Println(err)
 	}
+}
+
+func (app *application) BronzePlan(w http.ResponseWriter, r *http.Request) {
+
+	widget, err := app.DB.GetWidget(2)
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+
+	data := make(map[string]interface{})
+	data["widget"] = widget
+
+	// intMap := make(map[string]int)
+
+	// intMap["plan_id"] = 1
+
+	err = app.renderTemplate(w, r, "bronze-plan", &templateData{
+		Data: data,
+	})
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+
 }
