@@ -146,7 +146,7 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 		BankReturnCode:      txnData.BankReturnCode,
 		PaymentIntent:       txnData.PaymentIntentID,
 		PaymentMethod:       txnData.PaymentMethodID,
-		TransactionStatusId: 2,
+		TransactionStatusID: 2,
 	}
 
 	txnID, err := app.SaveTransaction(txn)
@@ -223,7 +223,7 @@ func (app *application) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r
 		BankReturnCode:      txnData.BankReturnCode,
 		PaymentIntent:       txnData.PaymentIntentID,
 		PaymentMethod:       txnData.PaymentMethodID,
-		TransactionStatusId: 2,
+		TransactionStatusID: 2,
 	}
 
 	_, err = app.SaveTransaction(txn)
@@ -376,6 +376,16 @@ func (app *application) BronzePlan(w http.ResponseWriter, r *http.Request) {
 	err = app.renderTemplate(w, r, "bronze-plan", &templateData{
 		Data: data,
 	})
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+
+}
+
+func (app *application) BronzePlanReceipt(w http.ResponseWriter, r *http.Request) {
+
+	err := app.renderTemplate(w, r, "receipt-plan", &templateData{})
 
 	if err != nil {
 		app.errorLog.Println(err)

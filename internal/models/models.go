@@ -77,7 +77,7 @@ type Transaction struct {
 	PaymentIntent       string    `json:"payment_intent"`
 	PaymentMethod       string    `json:"payment_method"`
 	BankReturnCode      string    `json:"bank_return_code"`
-	TransactionStatusId int       `json:"transaction_status_id"`
+	TransactionStatusID int       `json:"transaction_status_id"`
 	CreatedAt           time.Time `json:"-"`
 	UpdatedAt           time.Time `json:"-"`
 }
@@ -154,7 +154,7 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 	result, err := m.DB.ExecContext(ctx, stmt,
 		txn.Amount, txn.Currency, txn.LastFour,
 		txn.BankReturnCode, txn.ExpiryMonth, txn.ExpiryYear,
-		txn.PaymentIntent, txn.PaymentMethod, txn.TransactionStatusId,
+		txn.PaymentIntent, txn.PaymentMethod, txn.TransactionStatusID,
 		time.Now(), time.Now())
 
 	if err != nil {
