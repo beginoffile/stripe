@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"myapp/internal/cards"
 	"myapp/internal/models"
 	"net/http"
@@ -338,8 +337,6 @@ func (app *application) ChargeOne(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	widgetID, _ := strconv.Atoi(id)
 
-	fmt.Println(widgetID)
-
 	widget, err := app.DB.GetWidget(widgetID)
 	if err != nil {
 		app.errorLog.Println(err)
@@ -383,9 +380,20 @@ func (app *application) BronzePlan(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// BronzePlanReceipt display the receipt for bronze Plan
 func (app *application) BronzePlanReceipt(w http.ResponseWriter, r *http.Request) {
 
 	err := app.renderTemplate(w, r, "receipt-plan", &templateData{})
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+
+}
+
+// LoginPage display the login page
+func (app *application) LoginPage(w http.ResponseWriter, r *http.Request) {
+	err := app.renderTemplate(w, r, "login", &templateData{})
 
 	if err != nil {
 		app.errorLog.Println(err)

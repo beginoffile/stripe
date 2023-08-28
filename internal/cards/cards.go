@@ -1,8 +1,6 @@
 package cards
 
 import (
-	"fmt"
-
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/customer"
 	"github.com/stripe/stripe-go/v74/paymentintent"
@@ -69,7 +67,6 @@ func (c *Card) CreatePaymentIntent(currency string, amount int) (*stripe.Payment
 	if err != nil {
 		msg := ""
 		if stripeErr, ok := err.(*stripe.Error); ok {
-			fmt.Println("HUBO UN PEDO MUY GRUESO!!!!:::::::::::::::::::::::.")
 			msg = cardErrorMessage(stripeErr.Code)
 		}
 		return nil, msg, err

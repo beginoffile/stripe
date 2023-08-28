@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"myapp/internal/cards"
 	"myapp/internal/models"
 	"net/http"
@@ -116,8 +115,6 @@ func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 	var data stripePayLoad
-
-	fmt.Println(data)
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -256,5 +253,59 @@ func (app *application) SaveOrder(order models.Order) (int, error) {
 	}
 
 	return id, nil
+
+}
+
+func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
+	var userInput struct {
+		Emain    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJSON(w, r, &userInput)
+
+	// fmt.Println("Credentials", userInput)
+
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	//get the user from the database by email; send error if invalid email
+	user, err := app.DB.GetUserByEmail(userInput.Emain)
+	if err != nil {
+		app.invalidCredentials(w)
+		return
+	}
+
+	// validate the password; send error if invalid password
+	validatePassword, err := app.passwordMatches(user.Password, userInput.Password)
+	if err != nil {
+		app.invalidCredentials(w)
+		return
+	}
+
+	if !validatePassword {
+		app.invalidCredentials(w)
+		return
+	}
+
+	// generate the token
+
+	// send response
+
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = false
+	payload.Message = "Success!"
+
+	// out, _ := json.MarshalIndent(payload, "", "\t")
+	// w.Header().Set("Content-Type", "application/json")
+	// w.Write(out)
+
+	_ = app.writeJSON(w, http.StatusOK, payload)
 
 }

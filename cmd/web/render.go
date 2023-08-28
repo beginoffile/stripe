@@ -54,15 +54,12 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 
 	_, templateInMap := app.templateCache[templateToRender]
 
-	fmt.Println("Que hay AQUI?????==>", templateInMap)
-
 	if app.config.env == "production" && templateInMap {
-		fmt.Println("AUI", templateInMap)
+
 		t = app.templateCache[templateToRender]
 	} else {
-		fmt.Println("Else", page, partials, templateToRender)
+
 		t, err = app.parseTemplate(partials, page, templateToRender)
-		fmt.Println("t", t)
 
 		if err != nil {
 			app.errorLog.Println(err)
@@ -142,16 +139,12 @@ func (app *application) parseTemplate(partials []string, page, templateToRender 
 		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", strings.Join(partials, ","), templateToRender)
 	} else {
 		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", templateToRender)
-		fmt.Println("New Template", fmt.Sprintf("%s.page.tmpl", page))
-		fmt.Println("New Template", templateToRender)
+
 	}
 	if err != nil {
 		app.errorLog.Println(err)
 		return nil, err
 	}
-
-	fmt.Println(page)
-	fmt.Println(templateToRender)
 
 	/*
 		page = fmt.Sprintf("%s.page.tmpl", page)
