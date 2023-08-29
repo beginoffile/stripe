@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"myapp/internal/cards"
 	"myapp/internal/models"
 	"net/http"
@@ -258,7 +259,7 @@ func (app *application) SaveOrder(order models.Order) (int, error) {
 
 func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
 	var userInput struct {
-		Emain    string `json:"email"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
@@ -272,7 +273,7 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	//get the user from the database by email; send error if invalid email
-	user, err := app.DB.GetUserByEmail(userInput.Emain)
+	user, err := app.DB.GetUserByEmail(userInput.Email)
 	if err != nil {
 		app.invalidCredentials(w)
 		return
@@ -291,16 +292,23 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// generate the token
+	token, err := models.GenerateToken(user.ID, 24*time.Hour, models.ScopeAuthentication)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
 
 	// send response
 
 	var payload struct {
-		Error   bool   `json:"error"`
-		Message string `json:"message"`
+		Error   bool          `json:"error"`
+		Message string        `json:"message"`
+		Token   *models.Token `json:"authentication_token"`
 	}
 
 	payload.Error = false
-	payload.Message = "Success!"
+	payload.Message = fmt.Sprintf("token for %s created", userInput.Email)
+	payload.Token = token
 
 	// out, _ := json.MarshalIndent(payload, "", "\t")
 	// w.Header().Set("Content-Type", "application/json")
