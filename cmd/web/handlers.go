@@ -31,7 +31,7 @@ func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) 
 
 	if err := app.renderTemplate(w, r, "terminal", &templateData{
 		// StringMap: stringMap,
-	}, "stripe-js"); err != nil {
+	}); err != nil {
 		app.errorLog.Println(err)
 
 	}

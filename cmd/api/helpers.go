@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -37,6 +38,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, data in
 	dec := json.NewDecoder(r.Body)
 	err := dec.Decode(data)
 	if err != nil {
+		fmt.Println("[readJSON]1.-", err)
 		return err
 	}
 

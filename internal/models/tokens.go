@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
+	"log"
 	"time"
 )
 
@@ -57,15 +58,16 @@ func (m *DBModel) InsertToken(t *Token, u User) error {
 	}
 
 	stmt = `insert into tokens
-	(user_id, name, email, token_hash, created_at, updated_at)
+	(user_id, name, email, token_hash, expiry, created_at, updated_at)
 	values
-	(?,?,?,?,?,?)`
+	(?,?,?,?,?,?,?)`
 
 	_, err = m.DB.ExecContext(ctx, stmt,
 		u.ID,
 		u.LastName,
 		u.Email,
 		t.Hash,
+		t.Expiry,
 		time.Now(),
 		time.Now(),
 	)
@@ -75,5 +77,37 @@ func (m *DBModel) InsertToken(t *Token, u User) error {
 	}
 
 	return nil
+
+}
+
+func (m *DBModel) GetUserByToken(token string) (*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	tokenHash := sha256.Sum256([]byte(token))
+
+	var user User
+
+	query := `Select t1.id, t1.first_name, t1.last_name, t1.email
+	From Users t1
+		Inner Join Tokens t2
+		   On t2.user_id = t1.id
+	Where t2.token_hash = ?
+	  And t2.expiry > ?`
+
+	err := m.DB.QueryRowContext(ctx, query, tokenHash[:], time.Now()).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &user, nil
 
 }
