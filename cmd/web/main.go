@@ -87,6 +87,9 @@ func main() {
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 
+	// configure the session manager to use mysqlstore as the session store.
+	// session.Store = mysqlstore.New(conn)
+
 	tc := make(map[string]*template.Template)
 
 	app := &application{
