@@ -432,3 +432,11 @@ func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
+
+func (app *application) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	err := app.renderTemplate(w, r, "forgot-password", &templateData{})
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+}
