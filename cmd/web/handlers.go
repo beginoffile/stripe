@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"myapp/internal/cards"
+	"myapp/internal/encryption"
 	"myapp/internal/models"
 	urlsinger "myapp/internal/urlsigner"
 	"net/http"
@@ -444,6 +445,7 @@ func (app *application) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
 	theURL := r.RequestURI
 	testURL := fmt.Sprintf("%s%s", app.config.frontend, theURL)
 
@@ -457,10 +459,26 @@ func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	data := make(map[string]interface{})
-	data["email"] = r.URL.Query().Get("email")
+	//make sure not expired
+	expired := signer.Expired(testURL, 60)
+	if expired {
+		app.errorLog.Println("Link Expired")
+		return
+	}
 
-	err := app.renderTemplate(w, r, "reset-password", &templateData{Data: data})
+	encryptor := encryption.Encryption{
+		Key: []byte(app.config.secretkey),
+	}
+
+	encryptedEmail, err := encryptor.Encrypt(email)
+	if err != nil {
+		app.errorLog.Println("Encryption Failed")
+	}
+
+	data := make(map[string]interface{})
+	data["email"] = encryptedEmail
+
+	err = app.renderTemplate(w, r, "reset-password", &templateData{Data: data})
 
 	if err != nil {
 		app.errorLog.Println(err)
