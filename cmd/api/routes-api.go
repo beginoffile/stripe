@@ -29,6 +29,7 @@ func (app *application) routes() http.Handler {
 	mux.Route("/api/admin", func(mux chi.Router) {
 		mux.Use(app.Auth)
 		mux.Post("/virtual-terminal-succeeded", app.VirtualTerminalPaymentSucceeded)
+		mux.Post("/all-sales", app.AllSales)
 	})
 
 	return mux

@@ -43,15 +43,18 @@ type Widget struct {
 
 // Order is the type for all orders
 type Order struct {
-	ID            int       `json:"id"`
-	WidgetID      int       `json:"widget_id"`
-	TransactionID int       `json:"transaction_id"`
-	CustomerID    int       `json:"customers_id"`
-	StatusID      int       `json:"status_id"`
-	Quantity      int       `json:"quantity"`
-	Amount        int       `json:"amount"`
-	CreatedAt     time.Time `json:"-"`
-	UpdatedAt     time.Time `json:"-"`
+	ID            int         `json:"id"`
+	WidgetID      int         `json:"widget_id"`
+	TransactionID int         `json:"transaction_id"`
+	CustomerID    int         `json:"customers_id"`
+	StatusID      int         `json:"status_id"`
+	Quantity      int         `json:"quantity"`
+	Amount        int         `json:"amount"`
+	CreatedAt     time.Time   `json:"-"`
+	UpdatedAt     time.Time   `json:"-"`
+	Widget        Widget      `json:"widget"`
+	Transaction   Transaction `json:"transaction"`
+	Customer      Customer    `json:"customer"`
 }
 
 // status is the type for statuses
@@ -315,4 +318,56 @@ func (m *DBModel) UpdatePasswordForUser(u User, hash string) error {
 	}
 
 	return nil
+}
+
+func (m *DBModel) GetAllOrders() ([]*Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var orders []*Order
+
+	query := `
+	SELECT 	t1.id, 				t1.widget_id, 	t1.transaction_id, 
+			t1.customer_id, 	t1.status_id, 	t1.quantity, 
+			t1.amount, 			t1.created_at, 	t1.updated_at,
+			t2.name,			t3.currency,	t3.last_four,		
+			t3.expiry_month, 	t3.expiry_year,	t3.payment_intent, 	
+			t3.bank_return_code,t4.first_name, 	t4.last_name, 		
+			t4.email
+	From orders t1
+		Left JOIN widgets t2
+		  On t2.id = t1.widget_id
+		LEFT JOIN transactions t3
+		  On t3.id = t1.transaction_id
+		LEFT JOIN customers t4
+		  On t4.id = t1.customer_id
+	ORDER BY t1.created_at DESC`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var o Order
+		err = rows.Scan(
+			&o.ID, &o.WidgetID, &o.TransactionID,
+			&o.CustomerID, &o.StatusID, &o.Quantity,
+			&o.Amount, &o.CreatedAt, &o.UpdatedAt,
+			&o.Widget.Name, &o.Transaction.Currency, &o.Transaction.LastFour,
+			&o.Transaction.ExpiryMonth, &o.Transaction.ExpiryYear, &o.Transaction.PaymentIntent,
+			&o.Transaction.BankReturnCode, &o.Customer.FirstName, &o.Customer.LastName,
+			&o.Customer.Email,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, &o)
+
+	}
+
+	return orders, nil
+
 }
