@@ -1,0 +1,66 @@
+{{template "base" .}}
+
+{{define "tittle"}}
+    Sale
+{{end}}
+
+{{define "content"}}
+    <h2 class="mt-5">Sale</h2>
+    <hr>
+    <div>
+        <strong>Order No:</strong><span id="order-no"></span><br>
+        <strong>Customer:</strong><span id="customer"></span><br>
+        <strong>Product:</strong><span id="product"></span><br>
+        <strong>Quantity:</strong><span id="quantity"></span><br>
+        <strong>Total Sale:</strong><span id="amount"></span><br>
+
+    </div>
+    <hr>
+    <a href="/admin/all-sales" class="btn btn-info">Cancel</a>
+    <a href="#!" class="btn btn-warning">Refund Order</a>
+{{end}}
+
+{{define "js"}}
+<script>
+    let token = localStorage.getItem("token")
+    let id = window.location.pathname.split("/").pop();
+
+    console.log(id)
+    GetSale=async ()=>{
+        
+        const requestOptions = {
+            method: 'get',
+            headers: {
+                'Accept':'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,               
+            }
+            }
+
+        let response = await fetch('{{.API}}/api/admin/get-sale/' + id, requestOptions);          
+        let data = await response.json();
+        if (data){
+            document.getElementById("order-no").innerHTML = data.id;
+            document.getElementById("customer").innerHTML = data.customer.first_name + " " + data.customer.las_name;
+            document.getElementById("product").innerHTML = data.widget.name;
+            document.getElementById("quantity").innerHTML = data.quantity;
+            document.getElementById("amount").innerHTML = fortmatCurrency(data.transaction.amount);
+            console.log(data)
+        }
+    }
+
+    GetSale();
+
+    fortmatCurrency = (amount)=>{
+        let c = parseFloat(amount/100);
+        return c.toLocaleString("es-MX",{
+            style:"currency",
+            currency: "MXN",
+        })
+    }
+
+        
+</script>
+
+
+{{end}}

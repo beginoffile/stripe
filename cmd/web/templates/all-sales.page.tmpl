@@ -49,9 +49,47 @@
         let response = await fetch('{{.API}}/api/admin/all-sales', requestOptions);          
         let data = await response.json();
         console.log(data);
+        if (data){
+            data.forEach(element => {
+                let newRow=tbody.insertRow();
+                let newCell = newRow.insertCell();
+
+                newCell.innerHTML =  `<a href="/admin/sales/${element.id}">Order ${element.id}<a>`;
+                
+                newCell = newRow.insertCell();
+                let item = document.createTextNode(element.customer.first_name + " " + element.customer.last_name);
+                newCell.appendChild(item);
+
+
+                newCell = newRow.insertCell();
+                item = document.createTextNode(element.widget.name);
+                newCell.appendChild(item);
+
+                let cur = fortmatCurrency(element.transaction.amount);
+
+                newCell = newRow.insertCell();
+                item = document.createTextNode(cur);
+                newCell.appendChild(item);
+          });            
+        }else{
+            let newRow=tbody.insertRow();
+            let newCell = newRow.insertCell();
+            newCell.setAttribute("colspan","4");
+            newCell.innerHTML = "No data available";
+
+        }
+      
         }
 
         AllSales();
+
+        fortmatCurrency = (amount)=>{
+            let c = parseFloat(amount/100);
+            return c.toLocaleString("es-MX",{
+                style:"currency",
+                currency: "MXN",
+            })
+        }
           
         
     </script>

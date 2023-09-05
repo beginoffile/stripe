@@ -9,9 +9,87 @@
     <h2 class="mt-5">All Subscriptions</h2>
     <hr>
 
+    
+    <table id="sales-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Transaction</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
 {{end}}
 
 
 {{define "js"}}
+<script>
+    let token = localStorage.getItem("token")
+    let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+    
+
+
+    AllSales=async ()=>{
+        
+    const requestOptions = {
+        method: 'post',
+        headers: {
+            'Accept':'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,               
+        }
+        }
+
+    let response = await fetch('{{.API}}/api/admin/all-subscriptions', requestOptions);          
+    let data = await response.json();
+    console.log(data);
+    if (data){
+        data.forEach(element => {
+            let newRow=tbody.insertRow();
+            let newCell = newRow.insertCell();
+
+            newCell.innerHTML =  `<a href="/admin/subscriptions/${element.id}">Order ${element.id}<a>`;
+            
+            newCell = newRow.insertCell();
+            let item = document.createTextNode(element.customer.first_name + " " + element.customer.last_name);
+            newCell.appendChild(item);
+
+
+            newCell = newRow.insertCell();
+            item = document.createTextNode(element.widget.name);
+            newCell.appendChild(item);
+
+            let cur = fortmatCurrency(element.transaction.amount);
+
+            newCell = newRow.insertCell();
+            item = document.createTextNode(cur + "/month");
+            newCell.appendChild(item);
+        });            
+    }else{
+        let newRow=tbody.insertRow();
+        let newCell = newRow.insertCell();
+        newCell.setAttribute("colspan","4");
+        newCell.innerHTML = "No data available";
+
+    }
+    
+    }
+
+    AllSales();
+
+    fortmatCurrency = (amount)=>{
+        let c = parseFloat(amount/100);
+        return c.toLocaleString("es-MX",{
+            style:"currency",
+            currency: "MXN",
+        })
+    }
+        
+</script>
 
 {{end}}
