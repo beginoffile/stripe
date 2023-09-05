@@ -472,7 +472,7 @@ func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request
 
 	encryptedEmail, err := encryptor.Encrypt(email)
 	if err != nil {
-		app.errorLog.Println("Encryption Failed")
+		app.errorLog.Println("Encryption Failed", err)
 	}
 
 	data := make(map[string]interface{})
@@ -484,4 +484,22 @@ func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request
 		app.errorLog.Println(err)
 	}
 
+}
+
+func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
+
+	err := app.renderTemplate(w, r, "all-sales", &templateData{})
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
+
+	err := app.renderTemplate(w, r, "all-subscriptions", &templateData{})
+
+	if err != nil {
+		app.errorLog.Println(err)
+	}
 }
