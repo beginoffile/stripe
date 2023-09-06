@@ -504,7 +504,20 @@ func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) ShowSale(w http.ResponseWriter, r *http.Request) {
-	err := app.renderTemplate(w, r, "sale", &templateData{})
+	stringMap := make(map[string]string)
+	stringMap["title"] = "Sale"
+	stringMap["cancel"] = "/admin/all-sales"
+	err := app.renderTemplate(w, r, "sale", &templateData{StringMap: stringMap})
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+func (app *application) ShowSubscription(w http.ResponseWriter, r *http.Request) {
+	stringMap := make(map[string]string)
+	stringMap["title"] = "Subscription"
+	stringMap["cancel"] = "/admin/all-subscriptions"
+	err := app.renderTemplate(w, r, "sale", &templateData{StringMap: stringMap})
 	if err != nil {
 		app.errorLog.Println(err)
 	}

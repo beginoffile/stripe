@@ -16,6 +16,7 @@
                 <th>Customer</th>
                 <th>Product</th>
                 <th>Amount</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -65,11 +66,19 @@
                 item = document.createTextNode(element.widget.name);
                 newCell.appendChild(item);
 
-                let cur = fortmatCurrency(element.transaction.amount);
+                let cur = formatCurrency(element.transaction.amount);
 
                 newCell = newRow.insertCell();
                 item = document.createTextNode(cur);
                 newCell.appendChild(item);
+
+                newCell = newRow.insertCell();
+                if (element.status_id != 1){
+                    newCell.innerHTML = `<span class="badge bg-danger">Refunded</span>`
+                }else{
+                    newCell.innerHTML = `<span class="badge bg-success">Charged</span>`
+                }
+                
           });            
         }else{
             let newRow=tbody.insertRow();
@@ -83,13 +92,13 @@
 
         AllSales();
 
-        fortmatCurrency = (amount)=>{
-            let c = parseFloat(amount/100);
-            return c.toLocaleString("es-MX",{
-                style:"currency",
-                currency: "MXN",
-            })
-        }
+        // fortmatCurrency = (amount)=>{
+        //     let c = parseFloat(amount/100);
+        //     return c.toLocaleString("es-MX",{
+        //         style:"currency",
+        //         currency: "MXN",
+        //     })
+        // }
           
         
     </script>

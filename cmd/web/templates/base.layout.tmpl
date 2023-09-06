@@ -147,11 +147,21 @@
         }
       }
 
+      formatCurrency = (amount)=>{
+        let c = parseFloat(amount/100);
+        return c.toLocaleString("es-MX",{
+            style:"currency",
+            currency: "MXN",
+        })
+    }
+
     </script>
   
     {{block "js" .}}
   
     {{end}}
+
+    
     
   </body>
   

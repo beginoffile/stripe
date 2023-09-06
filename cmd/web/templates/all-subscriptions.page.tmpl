@@ -64,7 +64,7 @@
             item = document.createTextNode(element.widget.name);
             newCell.appendChild(item);
 
-            let cur = fortmatCurrency(element.transaction.amount);
+            let cur = formatCurrency(element.transaction.amount);
 
             newCell = newRow.insertCell();
             item = document.createTextNode(cur + "/month");
@@ -82,13 +82,13 @@
 
     AllSales();
 
-    fortmatCurrency = (amount)=>{
-        let c = parseFloat(amount/100);
-        return c.toLocaleString("es-MX",{
-            style:"currency",
-            currency: "MXN",
-        })
-    }
+    // fortmatCurrency = (amount)=>{
+    //     let c = parseFloat(amount/100);
+    //     return c.toLocaleString("es-MX",{
+    //         style:"currency",
+    //         currency: "MXN",
+    //     })
+    // }
         
 </script>
 
