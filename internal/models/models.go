@@ -373,6 +373,78 @@ func (m *DBModel) GetAllOrders() ([]*Order, error) {
 
 }
 
+// GetAllOrdersPaginated returns a slice of a subset of orders
+func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	offset := (page - 1) * pageSize
+
+	var orders []*Order
+
+	query := `
+	SELECT 	t1.id, 				t1.widget_id, 	t1.transaction_id, 
+			t1.customer_id, 	t1.status_id, 	t1.quantity, 
+			t1.amount, 			t1.created_at, 	t1.updated_at,
+			t2.name,			t3.amount, 		t3.currency,	
+			t3.last_four,		t3.expiry_month, t3.expiry_year,	
+			t3.payment_intent, 	t3.bank_return_code,t4.first_name, 	
+			t4.last_name, 		t4.email
+	From orders t1
+		Left JOIN widgets t2
+		  On t2.id = t1.widget_id
+		LEFT JOIN transactions t3
+		  On t3.id = t1.transaction_id
+		LEFT JOIN customers t4
+		  On t4.id = t1.customer_id
+	Where t2.is_recurring = 0
+	ORDER BY t1.created_at DESC
+	limit ? offset ?`
+
+	rows, err := m.DB.QueryContext(ctx, query, pageSize, offset)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var o Order
+		err = rows.Scan(
+			&o.ID, &o.WidgetID, &o.TransactionID,
+			&o.CustomerID, &o.StatusID, &o.Quantity,
+			&o.Amount, &o.CreatedAt, &o.UpdatedAt,
+			&o.Widget.Name, &o.Transaction.Amount, &o.Transaction.Currency,
+			&o.Transaction.LastFour, &o.Transaction.ExpiryMonth, &o.Transaction.ExpiryYear,
+			&o.Transaction.PaymentIntent, &o.Transaction.BankReturnCode, &o.Customer.FirstName,
+			&o.Customer.LastName, &o.Customer.Email,
+		)
+
+		if err != nil {
+			return nil, 0, 0, err
+		}
+
+		orders = append(orders, &o)
+
+	}
+
+	query = `
+	Select count(t1.id)
+	from orders t1
+		Left Join widgets t2
+		   On t2.id = t1.widget_id
+	Where t2.is_recurring = 0`
+
+	var totalrecords int
+	err = m.DB.QueryRowContext(ctx, query).Scan(&totalrecords)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	lastPage := totalrecords / pageSize
+
+	return orders, lastPage, totalrecords, nil
+
+}
+
 func (m *DBModel) GetAllSubscriptions() ([]*Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
