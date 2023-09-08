@@ -25,71 +25,125 @@
         </tbody>
     </table>
 
+    
+    <nav>
+        <ul id="paginator" class="pagination">        
+        </ul>
+    </nav>
+
+
 {{end}}
 
 
 {{define "js"}}
 <script>
-    let token = localStorage.getItem("token")
-    let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
-    
+   
+    let currentPage = 1;
+    let pageSize = 5;
 
+        const paginator = (pages, curPage)=>{
+            let p = document.getElementById("paginator");
+            let html = `<li class="page-item"><a class="page-link pager" href="#" data-page="${curPage - 1}">&lt;</a></li>`;
 
-    AllSales=async ()=>{
-        
-    const requestOptions = {
-        method: 'post',
-        headers: {
-            'Accept':'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token,               
-        }
-        }
-
-    let response = await fetch('{{.API}}/api/admin/all-subscriptions', requestOptions);          
-    let data = await response.json();
-    console.log(data);
-    if (data){
-        data.forEach(element => {
-            let newRow=tbody.insertRow();
-            let newCell = newRow.insertCell();
-
-            newCell.innerHTML =  `<a href="/admin/subscriptions/${element.id}">Order ${element.id}<a>`;
-            
-            newCell = newRow.insertCell();
-            let item = document.createTextNode(element.customer.first_name + " " + element.customer.last_name);
-            newCell.appendChild(item);
-
-
-            newCell = newRow.insertCell();
-            item = document.createTextNode(element.widget.name);
-            newCell.appendChild(item);
-
-            let cur = formatCurrency(element.transaction.amount);
-
-            newCell = newRow.insertCell();
-            item = document.createTextNode(cur + "/month");
-            newCell.appendChild(item);
-
-            newCell = newRow.insertCell();            
-            if (element.status_id != 1){
-                    newCell.innerHTML = `<span class="badge bg-danger">Cancelled</span>`
-            }else{
-                newCell.innerHTML = `<span class="badge bg-success">Charged</span>`
+            for (let i=0;i < pages;i++){
+                html +=  `<li class="page-item"><a class="page-link pager" href="#" data-page="${i + 1}">${i+1}</a></li>`
             }
 
-        });            
-    }else{
-        let newRow=tbody.insertRow();
-        let newCell = newRow.insertCell();
-        newCell.setAttribute("colspan","4");
-        newCell.innerHTML = "No data available";
+            html +=  `<li class="page-item"><a class="page-link pager" href="#" data-page="${curPage + 1}">&gt;</a></li>`
+            p.innerHTML = html;
 
+            
+            let Btnspage = document.getElementsByClassName("pager");
+           
+            for (let element of Btnspage){
+                element.addEventListener("click",(e)=>{
+                    let desiredPage = e.target.getAttribute("data-page");
+                    console.log("clicked and data page is ", desiredPage, pages);
+                    if (desiredPage > 0 && desiredPage<=pages){
+                        console.log("would go to page", desiredPage)
+                        updateTable(pageSize, desiredPage);
+                    }
+                })
+                
+            };
+
+           
+
+        }
+
+    const updateTable = (ps, cp )=>{
+        let token = localStorage.getItem("token")
+        let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+        tbody.innerHTML = "";
+
+        let body = {
+            page_size : parseInt(ps,10),
+            page: parseInt(cp,10),
+        }
+        AllSales=async ()=>{
+            
+        const requestOptions = {
+            method: 'post',
+            headers: {
+                'Accept':'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,               
+            },
+            body: JSON.stringify(body),
+            }
+
+        let response = await fetch('{{.API}}/api/admin/all-subscriptions', requestOptions);          
+        let data = await response.json();
+        console.log("data",data);
+        if (data.orders){
+            data.orders.forEach(element => {
+                let newRow=tbody.insertRow();
+                let newCell = newRow.insertCell();
+
+                newCell.innerHTML =  `<a href="/admin/subscriptions/${element.id}">Order ${element.id}<a>`;
+                
+                newCell = newRow.insertCell();
+                let item = document.createTextNode(element.customer.first_name + " " + element.customer.last_name);
+                newCell.appendChild(item);
+
+
+                newCell = newRow.insertCell();
+                item = document.createTextNode(element.widget.name);
+                newCell.appendChild(item);
+
+                let cur = formatCurrency(element.transaction.amount);
+
+                newCell = newRow.insertCell();
+                item = document.createTextNode(cur + "/month");
+                newCell.appendChild(item);
+
+                newCell = newRow.insertCell();            
+                if (element.status_id != 1){
+                        newCell.innerHTML = `<span class="badge bg-danger">Cancelled</span>`
+                }else{
+                    newCell.innerHTML = `<span class="badge bg-success">Charged</span>`
+                }
+
+            });   
+            paginator(data.last_page, data.current_page);         
+        }else{
+            let newRow=tbody.insertRow();
+            let newCell = newRow.insertCell();
+            newCell.setAttribute("colspan","4");
+            newCell.innerHTML = "No data available";
+
+        }
+        
+        }
+
+        AllSales();
     }
+
+
+    document.addEventListener("DOMContentLoaded", ()=>{        
+            updateTable(pageSize, currentPage);
+    })
     
-    }
-
-    AllSales();
 
     // fortmatCurrency = (amount)=>{
     //     let c = parseFloat(amount/100);

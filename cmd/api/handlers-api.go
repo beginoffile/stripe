@@ -571,7 +571,7 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allSales, lastPage, totalRecors, err := app.DB.GetAllOrdersPaginated(2, 1)
+	allSales, lastPage, totalRecors, err := app.DB.GetAllOrdersPaginated(payload.PageSize, payload.CurrentPage)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
@@ -585,7 +585,7 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 		Orders       []*models.Order `json:"orders"`
 	}
 
-	resp.CurrentPage = 1
+	resp.CurrentPage = payload.CurrentPage
 	resp.PageSize = payload.PageSize
 	resp.LastPage = lastPage
 	resp.TotalRecords = totalRecors
@@ -596,13 +596,45 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 
 // AllSubscriptions renders the all subscriptions page
 func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
-	allSubscriptions, err := app.DB.GetAllSubscriptions()
+	// allSubscriptions, err := app.DB.GetAllSubscriptions()
+	// if err != nil {
+	// 	app.badRequest(w, r, err)
+	// 	return
+	// }
+
+	// app.writeJSON(w, http.StatusOK, allSubscriptions)
+
+	var payload struct {
+		PageSize    int `json:"page_size"`
+		CurrentPage int `json:"page"`
+	}
+	err := app.readJSON(w, r, &payload)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, allSubscriptions)
+	allSales, lastPage, totalRecors, err := app.DB.GetAllSubscriptionsPaginated(payload.PageSize, payload.CurrentPage)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		CurrentPage  int             `json:"current_page"`
+		PageSize     int             `json:"page_size"`
+		LastPage     int             `json:"last_page"`
+		TotalRecords int             `json:"total_records"`
+		Orders       []*models.Order `json:"orders"`
+	}
+
+	resp.CurrentPage = payload.CurrentPage
+	resp.PageSize = payload.PageSize
+	resp.LastPage = lastPage
+	resp.TotalRecords = totalRecors
+	resp.Orders = allSales
+
+	app.writeJSON(w, http.StatusOK, resp)
 }
 
 func (app *application) GetSale(w http.ResponseWriter, r *http.Request) {
