@@ -765,8 +765,8 @@ func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
 
-	id := chi.URLParam(r, "id")
-	userID, _ := strconv.Atoi(id)
+	// id := chi.URLParam(r, "id")
+	// userID, _ := strconv.Atoi(id)
 
 	var user models.User
 
@@ -776,7 +776,7 @@ func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if userID > 0 {
+	if user.ID > 0 {
 		err = app.DB.EditUser(user)
 		if err != nil {
 			app.badRequest(w, r, err)
@@ -810,6 +810,31 @@ func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	app.writeJSON(w, http.StatusOK, resp)
+}
+
+func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
+
+	var user models.User
+
+	err := app.readJSON(w, r, &user)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	err = app.DB.DeleteUser(user.ID)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
 	}
 
 	var resp struct {

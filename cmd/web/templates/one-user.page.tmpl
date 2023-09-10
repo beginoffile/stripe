@@ -93,7 +93,7 @@
             body: JSON.stringify(payload),
         }
 
-        let response = await fetch('{{.API}}/api/admin/all-users/edit/' + id, requestOptions);          
+        let response = await fetch('{{.API}}/api/admin/all-users/edit', requestOptions);          
         let data = await response.json();
         console.log("Usuarios",data);
         if (data.error){
@@ -138,9 +138,9 @@
         getUser();
     })
 
-    delBtn.addEventListener("click", (e)=>{
+    delBtn.addEventListener("click", async (e)=>{
         
-        Swal.fire({
+        let result = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to undo this!",
             icon: 'warning',
@@ -152,38 +152,37 @@
 
             console.log("Would delete user id", id);
             
-            // if (result.isConfirmed) {
-            //     let payload = {
-            //         pi: document.getElementById("pi").value,
-            //         currency: document.getElementById("currency").value,
-            //         amount: parseInt(document.getElementById("charge-amount").value, 10),
-            //         id: parseInt(id, 10),
-            //     }
+            if (result.isConfirmed) {
 
-            //     const requestOptions = {
-            //     method: 'post',
-            //     headers: {
-            //         'Accept':'application/json',
-            //         'Content-Type': 'application/json',
-            //         'Authorization': 'Bearer ' + token,               
-            //     },
-            //     body: JSON.stringify(payload),
-            //     }
+                
+                let payload = {
+                    id: parseInt(id, 10),
+                }
 
-            //     let response = await fetch("{{.API}}/api/admin/refund", requestOptions);          
-            //     let response = await fetch("{{.API}}{{index .StringMap "refund-url"}}", requestOptions);          
-            //     let data = await response.json();      
-            //     console.log(data); 
-            //     if (data.error) {
-            //         showError(data.message);
-            //     }else{
-            //         showSuccess(data.message);
-            //         document.getElementById("btn-refund").classList.add("d-none");
-            //         document.getElementById("refunded").classList.remove("d-none");
-            //         document.getElementById("charged").classList.add("d-none");
-            //     }          
-            
-            // }
+
+                const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept':'application/json',
+                    'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,               
+                    },
+                body: JSON.stringify(payload),
+                }
+
+                response = await fetch("{{.API}}/api/admin/all-users/delete", requestOptions);                          
+                let data = await response.json();      
+                console.log(data); 
+                if (data.error) {
+                    // showError(data.message);
+                    Swal.fire("Error: "  + data.message);
+                }else{
+                    location.href = "/admin/all-users";
+                }
+            }
+
+
+         
         }
 
     )
