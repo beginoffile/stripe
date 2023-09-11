@@ -101,10 +101,8 @@
     <script>
       let socket;
       {{if eq .IsAuthenticated 1}}
-        document.addEventListener("DOMContentLoaded", ()=>{
-          if (!socket)
-            socket = new WebSocket("ws://localhost:4000/ws");
-
+        document.addEventListener("DOMContentLoaded", ()=>{          
+          socket = new WebSocket("ws://localhost:4000/ws");
           socket.onopen = () =>{
             console.log("Successfully connected to websockets");
           }
@@ -133,10 +131,10 @@
           }
         });
 
-        window.addEventListener("unload", function () {
-            if(socket.readyState == WebSocket.OPEN)
-                socket.close();
-        });
+        // window.addEventListener("unload", function () {
+        //     if(socket.readyState == WebSocket.OPEN)
+        //         socket.close();
+        // });
 
       {{end}}
       // let loginLink = document.getElementById("login-link")
