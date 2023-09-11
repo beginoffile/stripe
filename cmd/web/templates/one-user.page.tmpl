@@ -32,7 +32,7 @@
 
         <div class="mb-3">
             <label for="verify-password" class="form_label">Verify Password</label>
-            <input type="verify-password" class="form-control" id="verify-password" name="verify-password" autocomplete="verify-password-new">
+            <input type="password" class="form-control" id="verify-password" name="verify-password" autocomplete="verify-password-new">
         </div>
 
         <hr>
@@ -177,6 +177,11 @@
                     // showError(data.message);
                     Swal.fire("Error: "  + data.message);
                 }else{
+                    let jsonData = {
+                        action: "deleteUser",
+                        user_id: parseInt(id,10),
+                    }
+                    socket.send(JSON.stringify(jsonData));
                     location.href = "/admin/all-users";
                 }
             }

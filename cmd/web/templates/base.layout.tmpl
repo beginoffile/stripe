@@ -97,8 +97,48 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+      let socket;
+      {{if eq .IsAuthenticated 1}}
+        document.addEventListener("DOMContentLoaded", ()=>{
+          if (!socket)
+            socket = new WebSocket("ws://localhost:4000/ws");
+
+          socket.onopen = () =>{
+            console.log("Successfully connected to websockets");
+          }
+
+          socket.onclose = e=>{
+
+          }
+          socket.onerror = error =>{
+
+          }
+
+          socket.onmessage = msg =>{
+            let data = JSON.parse(msg.data);
+
+            switch (data.action){
+              case "logout":
+                if (data.user_id ==={{.UserID}}) {
+                  Swal.fire("Error: "  + data.message);
+                  setTimeout(() => {
+                    logout();
+                  }, 3000);                
+                }
+                break;
+              default:
+            }
+          }
+        });
+
+        window.addEventListener("unload", function () {
+            if(socket.readyState == WebSocket.OPEN)
+                socket.close();
+        });
+
+      {{end}}
       // let loginLink = document.getElementById("login-link")
       // let vtLink = document.getElementById("vt-link")
 
