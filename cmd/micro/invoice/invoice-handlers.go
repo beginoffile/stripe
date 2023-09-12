@@ -105,7 +105,7 @@ func (app *application) createInvoicePDF(order Order) error {
 	pdf.SetX(166)
 	pdf.CellFormat(20, 8, fmt.Sprintf("%d", order.Quantity), "", 0, "C", false, 0, "")
 
-	pdf.SetX(166)
+	pdf.SetX(185)
 	pdf.CellFormat(20, 8, fmt.Sprintf("$%.2f", float32(order.Amount/100.0)), "", 0, "R", false, 0, "")
 
 	invoicePath := fmt.Sprintf("./invoices/%d.pdf", order.ID)
