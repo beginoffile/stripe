@@ -20,36 +20,49 @@ type Order struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// type Products struct {
+// 	Name     string
+// 	Amount   int
+// 	Quantity int
+// }
+
 func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "hello %s", "world")
 
 	//receive json
 	var order Order
 
-	// err := app.readJSON(w, r, &order)
-	// if err != nil {
-	// 	app.badRequest(w, r, err)
-	// 	return
-	// }
+	err := app.readJSON(w, r, &order)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
 
-	order.ID = 3
-	order.Email = "me@here.com"
-	order.FirstName = "John"
-	order.LastName = "Smith"
-	order.Quantity = 1
-	order.Amount = 1000
-	order.Product = "Widget"
-	order.CreatedAt = time.Now()
+	// order.ID = 3
+	// order.Email = "me@here.com"
+	// order.FirstName = "John"
+	// order.LastName = "Smith"
+	// order.Quantity = 1
+	// order.Amount = 1000
+	// order.Product = "Widget"
+	// order.CreatedAt = time.Now()
 
 	//generate a pdf invoice
-	err := app.createInvoicePDF(order)
+	err = app.createInvoicePDF(order)
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
 
 	//create email
+	attachment := []string{
+		fmt.Sprintf("./invoices/%d.pdf", order.ID),
+	}
 
 	//send mail with attachment
+	err = app.SendMail("info@widgets.com", order.Email, "Your invoice", "invoice", attachment, nil)
+	if err != nil {
+		app.badRequest(w, r, err)
+	}
 
 	//send reponse
 	var resp struct {
